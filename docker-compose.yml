@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  html2pdf:
+    build: .
+    container_name: html2pdf
+    #ports:
+    #  - 8083:8080
+    networks:
+      - backend
+      - frontend
+    env_file:
+      - .env
+    restart: unless-stopped
+
+
+networks:
+  backend:
+    external: true
+  frontend:
+    external: true

@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-w7t==3^)!s*s640l**f2zu6&j0t&lh&20waj_lak4wh7_-4f0h"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["html2pdf.pival.fr"]
 
 
 # Application definition
@@ -53,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+CSRF_TRUSTED_ORIGINS = ['https://html2pdf.pival.fr']
 
 ROOT_URLCONF = "html2pdf.urls"
 
@@ -144,3 +145,32 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Temporary files directory
 TEMP_DIR = os.path.join(BASE_DIR, 'temp')
+
+# Add these settings
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Add MIME type handling
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Add these content type configurations
+MIME_TYPES = {
+    'css': 'text/css',
+    'js': 'application/javascript',
+}
+
+# If you're using whitenoise for static files (recommended), add this:
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
