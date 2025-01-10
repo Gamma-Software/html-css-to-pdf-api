@@ -106,7 +106,10 @@ class ConvertToPDFView(APIView):
                 ]
                 if not html_files:
                     return Response(
-                        {"error": "No HTML files found in the ZIP file."},
+                        {
+                            "error": "No HTML files found in the ZIP file. Found instead: "
+                            + str(os.listdir(extract_path))
+                        },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
