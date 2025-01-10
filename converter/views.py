@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(csrf_exempt, name="dispatch")
 class ConvertToPDFView(APIView):
     def post(self, request):
         try:
@@ -25,7 +25,7 @@ class ConvertToPDFView(APIView):
                         with open(html_path, "w", encoding="utf-8") as f:
                             f.write(request.data["html_content"])
 
-                        pdf = HTML(filename=html_path).write_pdf()
+                        pdf = HTML(filename=html_path, encoding="utf-8").write_pdf()
                         response = HttpResponse(pdf, content_type="application/pdf")
                         response["Content-Disposition"] = (
                             'attachment; filename="converted.pdf"'
@@ -60,7 +60,7 @@ class ConvertToPDFView(APIView):
                                 f.write(chunk)
 
                         # Convert to PDF
-                        pdf = HTML(filename=file_path).write_pdf()
+                        pdf = HTML(filename=file_path, encoding="utf-8").write_pdf()
 
                         # Create response
                         response = HttpResponse(pdf, content_type="application/pdf")
@@ -126,7 +126,7 @@ class ConvertToPDFView(APIView):
 
                 try:
                     # Convert to PDF
-                    pdf = HTML(filename=index_path).write_pdf()
+                    pdf = HTML(filename=index_path, encoding="utf-8").write_pdf()
                 except Exception as e:
                     return Response(
                         {"error": f"PDF conversion failed: {str(e)}"},
