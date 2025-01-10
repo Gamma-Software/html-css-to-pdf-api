@@ -49,6 +49,9 @@ COPY . .
 # Create media and temp directories
 RUN mkdir -p media temp
 
+# Create static directories
+RUN mkdir -p /app/static /app/staticfiles
+
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
 
