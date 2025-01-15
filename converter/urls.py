@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import ConvertToPDFView
+from . import views
 
 urlpatterns = [
-    path("convert/", ConvertToPDFView.as_view(), name="convert-to-pdf"),
+    path("html-to-pdf/", views.ConvertToPDFView.as_view(), name="html-to-pdf"),
+    path("svg-to-png/", views.convert_svg_to_png, name="svg-to-png"),
 ]

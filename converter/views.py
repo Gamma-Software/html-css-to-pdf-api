@@ -3,14 +3,17 @@ import os
 import shutil
 import tempfile
 import zipfile
+import base64
 from django.conf import settings
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view
 from weasyprint import HTML
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from html2image import Html2Image
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -144,3 +147,49 @@ class ConvertToPDFView(APIView):
                 {"error": f"An unexpected error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+@api_view(["POST"])
+def convert_svg_to_png(request):
+    """
+    Convert SVG to PNG using html2image.
+    Expects a JSON payload with an 'svg' field containing the SVG data.
+    Returns a base64 encoded PNG.
+    """
+    try:
+        svg_data = request.data.get("svg")
+        if not svg_data:
+            return Response(
+                {"error": "SVG data is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Save SVG to temporary file
+            svg_path = os.path.join(temp_dir, "input.svg")
+            png_path = os.path.join(temp_dir, "output.png")
+
+            with open(svg_path, "w", encoding="utf-8") as f:
+                f.write(svg_data)
+
+            # Initialize html2image
+            hti = Html2Image()
+
+            # Convert SVG to PNG
+            hti.screenshot(other_file=svg_path, save_as=png_path)
+
+            # Read the PNG and convert to base64
+            with open(png_path, "rb") as f:
+                png_data = f.read()
+                base64_png = base64.b64encode(png_data).decode("utf-8")
+
+            # Remove the temporary files
+            os.remove(svg_path)
+            os.remove(png_path)
+
+            return Response({"image": base64_png}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to convert SVG to PNG: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
