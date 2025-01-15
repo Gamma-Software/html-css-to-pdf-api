@@ -15,6 +15,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from html2image import Html2Image
 
+# Get Chrome flags from environment or use defaults
+CHROME_FLAGS = os.getenv('CHROME_FLAGS', '--no-sandbox --headless --disable-gpu --disable-dev-shm-usage')
+
+# Set Chrome options
+os.environ['CHROMIUM_FLAGS'] = CHROME_FLAGS
+
+# Set Chrome path
+os.environ['CHROME_BIN'] = '/usr/bin/chromium-browser'  # or '/usr/bin/chromium-browser' depending on your system
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ConvertToPDFView(APIView):
@@ -166,28 +174,37 @@ def convert_svg_to_png(request):
             )
 
         with tempfile.TemporaryDirectory() as temp_dir:
+            # Change to temporary directory for html2image to work correctly
+            os.chdir(temp_dir)
             svg_path = os.path.join(temp_dir, "input.svg")
-            png_path = os.path.join(temp_dir, "output.png")
+            png_path = "output.png"
 
             with open(svg_path, "w", encoding="utf-8") as f:
                 f.write(svg_data)
 
             # Initialize html2image with custom settings
-            hti = Html2Image(
-                output_path=temp_dir, size=(2400, 1800)  # Set viewport size
-            )
+            hti = Html2Image()
 
             # Convert SVG to PNG
-            hti.screenshot(other_file=svg_path, save_as=png_path)
+            hti.screenshot(other_file=str(svg_path), save_as=str(png_path))
 
             # Read the PNG and convert to base64
-            with open(png_path, "rb") as f:
+            with open("/app/" + png_path, "rb") as f:
                 png_data = f.read()
                 base64_png = base64.b64encode(png_data).decode("utf-8")
 
-            return Response({"image": base64_png}, status=status.HTTP_200_OK)
+            # Remove the temporary directory
+            shutil.rmtree(temp_dir)
+            os.remove("/app/" + png_path)
+
+            # Create response with PNG
+            response = HttpResponse(base64.b64decode(base64_png), content_type="image/png")
+            response["Content-Disposition"] = f'attachment; filename="converted.png"'
+            return response
 
     except Exception as e:
+        # Remove the temporary directory
+        shutil.rmtree(temp_dir)
         return Response(
             {"error": f"Failed to convert SVG to PNG: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

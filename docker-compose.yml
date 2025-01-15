@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   html2pdf:
     build: .
@@ -12,7 +10,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-
 
 networks:
   backend:

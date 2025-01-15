@@ -39,6 +39,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "converter",
+    'health_check',                             # required
+    'health_check.db',                          # database check
+    'health_check.cache',                       # cache check
+    'health_check.storage',                     # storage check
+    'health_check.contrib.migrations',          # migrations check
+    'health_check.contrib.psutil',              # disk and memory utilization check
 ]
 
 MIDDLEWARE = [
@@ -179,3 +185,9 @@ CORS_ALLOW_HEADERS = [
 # Ensure static files are properly served
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_ROOT = STATIC_ROOT
+
+# Add health check settings
+HEALTH_CHECK = {
+    'DISK_USAGE_MAX': 90,  # percent
+    'MEMORY_MIN': 100,    # in MB
+}
