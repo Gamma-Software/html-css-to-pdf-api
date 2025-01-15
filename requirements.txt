@@ -4,3 +4,4 @@ weasyprint==63.1
 #python-magic==0.4.27
 django-cors-headers==4.3.1
 whitenoise==6.6.0
+html2image==2.0.5
