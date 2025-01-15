@@ -151,28 +151,31 @@ class ConvertToPDFView(APIView):
 
 @api_view(["POST"])
 def convert_svg_to_png(request):
-    """
-    Convert SVG to PNG using html2image.
-    Expects a JSON payload with an 'svg' field containing the SVG data.
-    Returns a base64 encoded PNG.
-    """
     try:
-        svg_data = request.data.get("svg")
-        if not svg_data:
+        # Check if we received SVG content directly
+        if "svg_content" in request.data:
+            svg_data = request.data["svg_content"]
+        # Check if a file was uploaded
+        elif "file" in request.FILES:
+            svg_file = request.FILES["file"]
+            svg_data = svg_file.read().decode("utf-8")
+        else:
             return Response(
-                {"error": "SVG data is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "No SVG content or file provided"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Save SVG to temporary file
             svg_path = os.path.join(temp_dir, "input.svg")
             png_path = os.path.join(temp_dir, "output.png")
 
             with open(svg_path, "w", encoding="utf-8") as f:
                 f.write(svg_data)
 
-            # Initialize html2image
-            hti = Html2Image()
+            # Initialize html2image with custom settings
+            hti = Html2Image(
+                output_path=temp_dir, size=(2400, 1800)  # Set viewport size
+            )
 
             # Convert SVG to PNG
             hti.screenshot(other_file=svg_path, save_as=png_path)
@@ -181,10 +184,6 @@ def convert_svg_to_png(request):
             with open(png_path, "rb") as f:
                 png_data = f.read()
                 base64_png = base64.b64encode(png_data).decode("utf-8")
-
-            # Remove the temporary files
-            os.remove(svg_path)
-            os.remove(png_path)
 
             return Response({"image": base64_png}, status=status.HTTP_200_OK)
 
