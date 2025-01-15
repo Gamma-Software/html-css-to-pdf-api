@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-w7t==3^)!s*s640l**f2zu6&j0t&lh&20waj_lak4wh7_-4f0h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["html2pdf.pival.fr"]
+ALLOWED_HOSTS = ["html2pdf.pival.fr", "converter.pival.fr", "parser.pival.fr"]
 
 # Application definition
 INSTALLED_APPS = [
